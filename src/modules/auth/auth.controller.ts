@@ -5,11 +5,8 @@ import { AuthService } from "./auth.service";
 import { sendResponse } from "../../utils/sendResponse";
 import { createUserTokens } from "../../utils/userTokens";
 import { setAuthCookie } from "../../utils/setCookie";
-import { generateToken } from "../../utils/jwt";
-import { sendPasswordResetEmail } from "../../utils/sendEmail";
-import { envVars } from "../../config/env";
-import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../utils/AppError";
+import { envVars } from "../../config/env";
 
 // create user controller
 const createUser = catchAsync(
@@ -72,13 +69,9 @@ const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const newPassword = req.body.newPassword;
     const oldPassword = req.body.oldPassword;
-    const accessToken = req.cookies.accessToken; 
+    const accessToken = req.cookies.accessToken;
 
-    await AuthService.resetPassword(
-      oldPassword,
-      newPassword,
-      accessToken,
-    );
+    await AuthService.resetPassword(oldPassword, newPassword, accessToken);
 
     sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -136,6 +129,29 @@ const logout = catchAsync(
   },
 );
 
+const googleCallbackController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let redirectTo = req.query.state ? (req.query.state as string) : "";
+
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
+
+    // /booking => booking , => "/" => ""
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+    }
+
+    const tokenInfo = createUserTokens(user);
+
+    setAuthCookie(res, tokenInfo);
+
+    res.redirect(`${envVars.CLIENT_URL}/${redirectTo}`);
+  },
+);
+
 export const AuthController = {
   createUser,
   login,
@@ -143,4 +159,5 @@ export const AuthController = {
   resetPassword,
   getNewAccessToken,
   logout,
+  googleCallbackController,
 };

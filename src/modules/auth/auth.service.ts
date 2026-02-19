@@ -9,7 +9,11 @@ import { envVars } from "../../config/env";
 import { sendPasswordResetEmail } from "../../utils/sendEmail";
 import { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { createNewAccessTokenWithRefreshToken } from "../../utils/userTokens";
+import {
+  createNewAccessTokenWithRefreshToken,
+  createUserTokens,
+} from "../../utils/userTokens";
+import { AuthTokens } from "../../utils/setCookie";
 
 // create user service
 const createUser = async (payload: Partial<IUser>) => {
@@ -127,10 +131,56 @@ const getNewAccessToken = async (refreshToken: string) => {
   };
 };
 
+const googleAuth = async (profile: {
+  googleId: string;
+  email: string;
+  name: string;
+  profileImage?: string;
+}): Promise<{ user: IUser; tokens: AuthTokens }> => {
+  let user = await User.findOne({
+    $or: [
+      {
+        auths: {
+          $elemMatch: { provider: "google", providerId: profile.googleId },
+        },
+      },
+      { email: profile.email },
+    ],
+  });
+
+  if (!user) {
+    user = await User.create({
+      name: profile.name,
+      email: profile.email,
+      profileImage: profile.profileImage,
+      auths: [
+        {
+          provider: "google",
+          providerId: profile.googleId,
+        },
+      ],
+    });
+  } else if (!user.auths.some((auth) => auth.provider === "google")) {
+    // Link Google account to existing email-based account
+    user.auths.push({
+      provider: "google",
+      providerId: profile.googleId,
+    });
+    if (!user.profileImage && profile.profileImage) {
+      user.profileImage = profile.profileImage;
+    }
+    await user.save();
+  }
+
+  const tokens = createUserTokens(user);
+  return { user, tokens };
+};
+
 export const AuthService = {
   createUser,
   login,
   forgotPassword,
   resetPassword,
   getNewAccessToken,
+  googleAuth,
 };
