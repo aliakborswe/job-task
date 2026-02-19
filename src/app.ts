@@ -6,6 +6,9 @@ import { envVars } from "./config/env";
 import cookieParser from "cookie-parser";
 import { router } from "./routes";
 import notFound from "./middlewares/notFound";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
+import passport from "passport";
+import "./config/passport";
 
 const app = express();
 
@@ -17,12 +20,18 @@ app.use(
   }),
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: envVars.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 app.use("/api/v1", router);
-
 app.get("/", (req: Request, res: Response) => {
   res.status(httpStatus.OK).json({
     message: "Welcome to Store Management System Backend",
@@ -36,5 +45,6 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
