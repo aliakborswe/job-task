@@ -9,6 +9,7 @@ import { generateToken } from "../../utils/jwt";
 import { sendPasswordResetEmail } from "../../utils/sendEmail";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import AppError from "../../utils/AppError";
 
 // create user controller
 const createUser = catchAsync(
@@ -71,12 +72,12 @@ const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const newPassword = req.body.newPassword;
     const oldPassword = req.body.oldPassword;
-    const accessToken = req.cookies["accessToken"]; 
+    const accessToken = req.cookies.accessToken; 
 
     await AuthService.resetPassword(
       oldPassword,
       newPassword,
-      accessToken as JwtPayload,
+      accessToken,
     );
 
     sendResponse(res, {
@@ -88,9 +89,58 @@ const resetPassword = catchAsync(
   },
 );
 
+// get new access token with refresh token service
+const getNewAccessToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "No refresh token received from cookies",
+      );
+    }
+
+    const tokenInfo = await AuthService.getNewAccessToken(refreshToken);
+    setAuthCookie(res, tokenInfo);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "New Access Token Retrieved Successful",
+      data: tokenInfo,
+    });
+  },
+);
+
+// logout controller
+const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User Logout Successful",
+      data: null,
+    });
+  },
+);
+
 export const AuthController = {
   createUser,
   login,
   forgotPassword,
   resetPassword,
+  getNewAccessToken,
+  logout,
 };

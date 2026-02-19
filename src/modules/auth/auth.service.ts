@@ -9,6 +9,7 @@ import { envVars } from "../../config/env";
 import { sendPasswordResetEmail } from "../../utils/sendEmail";
 import { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { createNewAccessTokenWithRefreshToken } from "../../utils/userTokens";
 
 // create user service
 const createUser = async (payload: Partial<IUser>) => {
@@ -100,21 +101,30 @@ const resetPassword = async (
   ) as JwtPayload;
   const user = await User.findById(decodedToken.userId).select("+password");
 
-    const isOldPasswordMatch = await bcrypt.compare(
-      oldPassword,
-      user!.password as string,
-    );
+  const isOldPasswordMatch = await bcrypt.compare(
+    oldPassword,
+    user!.password as string,
+  );
 
-    if (!isOldPasswordMatch) {
-      throw new AppError(httpStatus.UNAUTHORIZED, "Old Password does not match");
-    }
+  if (!isOldPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old Password does not match");
+  }
 
-    user!.password = await bcrypt.hash(
-      newPassword,
-      Number(envVars.BCRYPT_SALT_ROUNDS),
-    );
+  user!.password = await bcrypt.hash(
+    newPassword,
+    Number(envVars.BCRYPT_SALT_ROUNDS),
+  );
 
-    user!.save();
+  user!.save();
+};
+
+// get new access token using refresh token
+const getNewAccessToken = async (refreshToken: string) => {
+  const newAccessToken =
+    await createNewAccessTokenWithRefreshToken(refreshToken);
+  return {
+    accessToken: newAccessToken,
+  };
 };
 
 export const AuthService = {
@@ -122,4 +132,5 @@ export const AuthService = {
   login,
   forgotPassword,
   resetPassword,
+  getNewAccessToken,
 };

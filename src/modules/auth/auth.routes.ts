@@ -17,11 +17,12 @@ router.post(
   validate(forgotPasswordSchema),
   AuthController.forgotPassword,
 );
-
 router.post(
   "/reset-password",
   validate(resetPasswordSchema),
   AuthController.resetPassword,
 );
+router.post("/refresh-token", AuthController.getNewAccessToken);
+router.post("/logout", AuthController.logout);
 
 export const AuthRoutes = router;
