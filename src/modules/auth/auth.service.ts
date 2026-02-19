@@ -1,9 +1,7 @@
 import httpStatus from "http-status";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
-import bcrypt from "bcrypt";
 import { IAuthProvider } from "../user/user.interface";
-import { envVars } from "../../config/env";
 import AppError from "../../utils/AppError";
 import { hashPassword } from "../../helpers/hash";
 
@@ -11,7 +9,7 @@ import { hashPassword } from "../../helpers/hash";
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
-  console.log("payload from service", payload)
+  console.log("payload from service", payload);
 
   const isUserExist = await User.findOne({ email });
 
@@ -35,9 +33,9 @@ const createUser = async (payload: Partial<IUser>) => {
     auths: [authProvider],
     ...rest,
   });
+
   return user;
 };
-
 
 export const AuthService = {
   createUser,
