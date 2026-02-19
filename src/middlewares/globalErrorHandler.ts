@@ -8,6 +8,9 @@ export const globalErrorHandler = (
   res: Response,
   _next: NextFunction,
 ): void => {
+
+  console.error("Error:", err);
+
   let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR as number;
   let message = "Internal server error";
   let isOperational = false;
