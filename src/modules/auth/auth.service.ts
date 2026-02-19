@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { IAuthProvider } from "../user/user.interface";
 import { envVars } from "../../config/env";
 import AppError from "../../utils/AppError";
+import { hashPassword } from "../../helpers/hash";
 
 // create a new user
 const createUser = async (payload: Partial<IUser>) => {
@@ -21,10 +22,7 @@ const createUser = async (payload: Partial<IUser>) => {
     );
   }
 
-  const hashedPassword = await bcrypt.hash(
-    password as string,
-    Number(envVars.BCRYPT_SALT_ROUNDS),
-  );
+  const hashedPassword = await hashPassword(password as string);
 
   const authProvider: IAuthProvider = {
     provider: "credentials",
