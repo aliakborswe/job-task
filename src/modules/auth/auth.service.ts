@@ -4,9 +4,11 @@ import { User } from "../user/user.model";
 import { IAuthProvider } from "../user/user.interface";
 import AppError from "../../utils/AppError";
 import { comparePassword, hashPassword } from "../../helpers/hash";
-import { generateToken } from "../../utils/jwt";
+import { generateToken, verifyToken } from "../../utils/jwt";
 import { envVars } from "../../config/env";
 import { sendPasswordResetEmail } from "../../utils/sendEmail";
+import { JwtPayload } from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 // create user service
 const createUser = async (payload: Partial<IUser>) => {
@@ -86,8 +88,38 @@ const forgotPassword = async (email: string) => {
   return;
 };
 
+// reset password service
+const resetPassword = async (
+  oldPassword: string,
+  newPassword: string,
+  accessToken: string,
+) => {
+  const decodedToken = verifyToken(
+    accessToken,
+    envVars.JWT_ACCESS_SECRET,
+  ) as JwtPayload;
+  const user = await User.findById(decodedToken.userId).select("+password");
+
+    const isOldPasswordMatch = await bcrypt.compare(
+      oldPassword,
+      user!.password as string,
+    );
+
+    if (!isOldPasswordMatch) {
+      throw new AppError(httpStatus.UNAUTHORIZED, "Old Password does not match");
+    }
+
+    user!.password = await bcrypt.hash(
+      newPassword,
+      Number(envVars.BCRYPT_SALT_ROUNDS),
+    );
+
+    user!.save();
+};
+
 export const AuthService = {
   createUser,
   login,
   forgotPassword,
+  resetPassword,
 };

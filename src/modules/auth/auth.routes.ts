@@ -4,6 +4,7 @@ import {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
+  resetPasswordSchema,
 } from "./auth.validation";
 import { AuthController } from "./auth.controller";
 
@@ -15,6 +16,12 @@ router.post(
   "/forgot-password",
   validate(forgotPasswordSchema),
   AuthController.forgotPassword,
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  AuthController.resetPassword,
 );
 
 export const AuthRoutes = router;

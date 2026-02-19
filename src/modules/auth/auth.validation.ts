@@ -53,3 +53,25 @@ export const forgotPasswordSchema = z.object({
       .toLowerCase(),
   }),
 });
+
+export const resetPasswordSchema = z.object({
+  body: z
+    .object({
+      oldPassword: z.string({ error: "Old password is required" }),
+      newPassword: z
+        .string({ error: "New password is required" })
+        .min(8, "Password must be at least 8 characters")
+        .max(128, "Password must be at most 128 characters")
+        .regex(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+          "Password must contain at least one uppercase letter, one lowercase letter, and one digit",
+        ),
+      confirmNewPassword: z.string({
+        error: "Confirm new password is required",
+      }),
+    })
+    .refine((data) => data.newPassword === data.confirmNewPassword, {
+      message: "Passwords do not match",
+      path: ["confirmNewPassword"],
+    }),
+});

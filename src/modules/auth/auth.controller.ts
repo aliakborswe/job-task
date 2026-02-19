@@ -8,6 +8,7 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { generateToken } from "../../utils/jwt";
 import { sendPasswordResetEmail } from "../../utils/sendEmail";
 import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 // create user controller
 const createUser = catchAsync(
@@ -65,8 +66,31 @@ const forgotPassword = catchAsync(
   },
 );
 
+// reset password controller
+const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const accessToken = req.cookies["accessToken"]; 
+
+    await AuthService.resetPassword(
+      oldPassword,
+      newPassword,
+      accessToken as JwtPayload,
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Password Changed Successfully",
+      data: null,
+    });
+  },
+);
+
 export const AuthController = {
   createUser,
   login,
   forgotPassword,
+  resetPassword,
 };
