@@ -32,3 +32,14 @@ export const registerSchema = z.object({
       path: ["confirmPassword"],
     }),
 });
+
+export const loginSchema = z.object({
+  body: z.object({
+    email: z
+      .string({ error: "Email is required" })
+      .email("Invalid email address")
+      .trim()
+      .toLowerCase(),
+    password: z.string({ error: "Password is required" }),
+  }),
+});

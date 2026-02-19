@@ -29,10 +29,13 @@ const createUser = catchAsync(
 // login controller
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("login info: ", req.body);
+
     const user = await AuthService.login(req.body);
+
     const tokens = createUserTokens(user);
+
     setAuthCookie(res, tokens);
+    
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,

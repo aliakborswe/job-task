@@ -40,7 +40,6 @@ const createUser = async (payload: Partial<IUser>) => {
 // login service
 const login = async (payload: Partial<IUser>) => {
   const { email, password } = payload;
-  console.log("login payload: ", payload);
   const user = await User.findOne({ email: email }).select("+password");
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
