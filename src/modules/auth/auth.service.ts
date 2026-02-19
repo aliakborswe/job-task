@@ -3,9 +3,9 @@ import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { IAuthProvider } from "../user/user.interface";
 import AppError from "../../utils/AppError";
-import { hashPassword } from "../../helpers/hash";
+import { comparePassword, hashPassword } from "../../helpers/hash";
 
-// create a new user
+// create user service
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
@@ -37,6 +37,34 @@ const createUser = async (payload: Partial<IUser>) => {
   return user;
 };
 
+// login service
+const login = async (payload: Partial<IUser>) => {
+  const { email, password } = payload;
+  console.log("login payload: ", payload);
+  const user = await User.findOne({ email: email }).select("+password");
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
+  }
+
+  if (!user.password) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "This account uses Google login. Please sign in with Google.",
+    );
+  }
+
+  const isPasswordValid = await comparePassword(
+    password as string,
+    user.password,
+  );
+  if (!isPasswordValid) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
+  }
+
+  return user;
+};
+
 export const AuthService = {
   createUser,
+  login,
 };
