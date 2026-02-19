@@ -6,6 +6,7 @@ import { envVars } from "./config/env";
 import cookieParser from "cookie-parser";
 import { router } from "./routes";
 import notFound from "./middlewares/notFound";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 
 const app = express();
 
@@ -36,5 +37,6 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
