@@ -57,8 +57,25 @@ const renameFolder = catchAsync(
   },
 );
 
+// create private folder controller
+const createPrivateFolder = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const { name, pin } = req.body;
+    const folder = await FolderService.createPrivateFolder(userId, name, pin);
+
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: "Private folder created successfully",
+      data: folder,
+    });
+  },
+);
+
 export const FolderController = {
   createFolder,
   getFolders,
   renameFolder,
+  createPrivateFolder,
 };
