@@ -164,10 +164,68 @@ const copyFile = async (
   return copiedFile;
 };
 
+const duplicateFile = async (
+  userId: string,
+  fileId: string,
+): Promise<IFile> => {
+  const file = await File.findOne({ _id: fileId, userId });
+  if (!file) {
+    throw new AppError(httpStatus.NOT_FOUND, "File not found");
+  }
+
+  await checkUserStorage(userId, file.size);
+
+  const ext = path.extname(file.path);
+  const newFileName = `${uuidv4()}${ext}`;
+  const newPath = path.join(path.dirname(file.path), newFileName);
+  copyLocalFile(file.path, newPath);
+
+  const duplicatedFile = await File.create({
+    name: `${file.name} (copy)`,
+    originalName: file.originalName,
+    type: file.type,
+    mimeType: file.mimeType,
+    size: file.size,
+    path: newPath,
+    userId,
+    folderId: file.folderId,
+    isPrivate: file.isPrivate,
+  });
+
+  await Promise.all([
+    User.findByIdAndUpdate(userId, { $inc: { storageUsed: file.size } }),
+    Folder.findByIdAndUpdate(file.folderId, {
+      $inc: { storageUsed: file.size },
+    }),
+  ]);
+
+  return duplicatedFile;
+};
+
+const deleteFile = async (userId: string, fileId: string): Promise<void> => {
+  const file = await File.findOne({ _id: fileId, userId });
+  if (!file) {
+    throw new AppError(httpStatus.NOT_FOUND, "File not found");
+  }
+
+  deleteLocalFile(file.path);
+
+  await Promise.all([
+    User.findByIdAndUpdate(userId, { $inc: { storageUsed: -file.size } }),
+    Folder.findByIdAndUpdate(file.folderId, {
+      $inc: { storageUsed: -file.size },
+    }),
+  ]);
+
+  await File.findByIdAndDelete(fileId);
+};
+
 export const FileService = {
   uploadFile,
   getFilesByFolder,
   getFileById,
   renameFile,
   copyFile,
+  duplicateFile,
+  deleteFile,
 };

@@ -96,10 +96,41 @@ const copyFile = catchAsync(
   },
 );
 
+const duplicateFile = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const fileId = req.params.fileId as string;
+    const file = await FileService.duplicateFile(userId, fileId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "File duplicated successfully",
+      data: file,
+    });
+  },
+);
+
+const deleteFile = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const fileId = req.params.fileId as string;
+    await FileService.deleteFile(userId, fileId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "File deleted successfully",
+    });
+  },
+);
+
 export const FileController = {
   uploadFile,
   getFilesByFolder,
   getFileById,
   renameFile,
   copyFile,
+  duplicateFile,
+  deleteFile,
 };

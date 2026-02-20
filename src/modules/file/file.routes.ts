@@ -4,6 +4,8 @@ import { FileController } from "./file.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import {
   copyFileSchema,
+  deleteFileSchema,
+  duplicateFileSchema,
   getFilesByFolderSchema,
   renameFileSchema,
 } from "./file.validation";
@@ -25,6 +27,13 @@ router.post(
   FileController.copyFile,
 );
 
+router.post(
+  "/duplicate/:fileId",
+  checkAuth,
+  validate(duplicateFileSchema),
+  FileController.duplicateFile,
+);
+
 router.get(
   "/folder/:folderId",
   checkAuth,
@@ -38,6 +47,13 @@ router.patch(
   checkAuth,
   validate(renameFileSchema),
   FileController.renameFile,
+);
+
+router.delete(
+  "/:fileId",
+  checkAuth,
+  validate(deleteFileSchema),
+  FileController.deleteFile,
 );
 
 export const FileRoutes = router;
