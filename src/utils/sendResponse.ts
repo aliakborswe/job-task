@@ -3,6 +3,8 @@ import { Response } from "express";
 
 interface TMeta {
     total: number;
+    page: number;
+    limit: number;
 }
 
 interface TResponse<T> {

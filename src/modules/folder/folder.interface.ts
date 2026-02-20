@@ -9,3 +9,11 @@ export interface IFolder {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+ export interface PaginationResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
