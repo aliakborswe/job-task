@@ -45,16 +45,12 @@ router.get(
   validate(searchFilesSchema),
   FileController.searchFiles,
 );
-
 router.get("/favorites", checkAuth, FileController.getFavorites);
-
-// Public route to access shared files - MOVE THIS UP
 router.get(
   "/shared/:shareToken",
   validate(getSharedFileSchema),
   FileController.getSharedFile,
 );
-
 router.get(
   "/folder/:folderId",
   checkAuth,
@@ -62,7 +58,6 @@ router.get(
   FileController.getFilesByFolder,
 );
 
-// Generic /:fileId route should be LAST among GET routes
 router.get("/:fileId", checkAuth, FileController.getFileById);
 
 router.patch(

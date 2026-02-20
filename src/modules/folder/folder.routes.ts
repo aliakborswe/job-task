@@ -34,6 +34,7 @@ router.get(
   FolderController.searchFolders,
 );
 router.get("/", checkAuth, FolderController.getFolders);
+
 router.get("/:folderId", checkAuth, FolderController.getFolderById);
 
 router.patch(
