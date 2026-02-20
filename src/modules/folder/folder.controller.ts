@@ -72,10 +72,62 @@ const createPrivateFolder = catchAsync(
     });
   },
 );
+const getPrivateFolder = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const folder = await FolderService.getPrivateFolder(userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: folder
+        ? "Private folder get successfully"
+        : "No private folder found",
+      data: folder,
+    });
+  },
+);
+
+// get folder by id controller
+const getFolderById = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const folderId = req.params.folderId as string;
+    const folder = await FolderService.getFolderById(userId, folderId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Folder retrieved successfully",
+      data: folder,
+    });
+  },
+);
+
+const searchFolders = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const name = (req.query.name as string) || "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const result = await FolderService.searchFolders(userId, name, page, limit);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Search results retrieved successfully",
+      data: result.data,
+      meta: { page: result.page, limit: result.limit, total: result.total },
+    });
+  },
+);
 
 export const FolderController = {
   createFolder,
   getFolders,
   renameFolder,
   createPrivateFolder,
+  getPrivateFolder,
+  getFolderById,
+  searchFolders,
 };

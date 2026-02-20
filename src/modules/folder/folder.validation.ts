@@ -35,3 +35,11 @@ export const createPrivateFolderSchema = z.object({
       .regex(/^\d{4,6}$/, "PIN must be a 4 to 6 digit number"),
   }),
 });
+
+export const searchFoldersSchema = z.object({
+  query: z.object({
+    name: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+  }),
+});

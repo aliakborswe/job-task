@@ -5,6 +5,7 @@ import {
   createFolderSchema,
   createPrivateFolderSchema,
   renameFolderSchema,
+  searchFoldersSchema,
 } from "./folder.validation";
 import { FolderController } from "./folder.controller";
 
@@ -24,7 +25,15 @@ router.post(
   FolderController.createPrivateFolder,
 );
 
+router.get("/private", checkAuth, FolderController.getPrivateFolder);
+router.get(
+  "/search",
+  checkAuth,
+  validate(searchFoldersSchema),
+  FolderController.searchFolders,
+);
 router.get("/", checkAuth, FolderController.getFolders);
+router.get("/:folderId", checkAuth, FolderController.getFolderById);
 
 router.patch(
   "/:folderId",

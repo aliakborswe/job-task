@@ -80,10 +80,50 @@ const createPrivateFolder = async (
 
   return folder;
 };
+const getPrivateFolder = async (userId: string): Promise<IFolder | null> => {
+  return Folder.findOne({ userId, isPrivate: true });
+};
+
+// get folder by id service
+const getFolderById = async (
+  userId: string,
+  folderId: string,
+): Promise<IFolder> => {
+  const folder = await Folder.findOne({ _id: folderId, userId });
+  if (!folder) {
+    throw new AppError(httpStatus.NOT_FOUND, "Folder not found");
+  }
+  return folder;
+};
+
+// search folders service
+const searchFolders = async (
+  userId: string,
+  name: string,
+  page = 1,
+  limit = 20,
+): Promise<PaginationResult<IFolder>> => {
+  const skip = (page - 1) * limit;
+  const query = {
+    userId,
+    isPrivate: false,
+    name: { $regex: name, $options: "i" },
+  };
+
+  const [folders, total] = await Promise.all([
+    Folder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Folder.countDocuments(query),
+  ]);
+
+  return { data: folders, total, page, limit };
+};
 
 export const FolderService = {
   createFolder,
   getFolders,
   renameFolder,
   createPrivateFolder,
+  getPrivateFolder,
+  getFolderById,
+  searchFolders,
 };
