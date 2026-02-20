@@ -68,15 +68,14 @@ const forgotPassword = catchAsync(
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const newPassword = req.body.newPassword;
-    const oldPassword = req.body.oldPassword;
     const accessToken = req.cookies.accessToken;
 
-    await AuthService.resetPassword(oldPassword, newPassword, accessToken);
+    await AuthService.resetPassword(newPassword, accessToken);
 
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: "Password Changed Successfully",
+      message: "Password reset Successfully",
       data: null,
     });
   },
@@ -136,8 +135,6 @@ const googleCallbackController = catchAsync(
     if (redirectTo.startsWith("/")) {
       redirectTo = redirectTo.slice(1);
     }
-
-    // /booking => booking , => "/" => ""
     const user = req.user;
 
     if (!user) {

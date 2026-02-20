@@ -94,30 +94,17 @@ const forgotPassword = async (email: string) => {
 };
 
 // reset password service
-const resetPassword = async (
-  oldPassword: string,
-  newPassword: string,
-  accessToken: string,
-) => {
+const resetPassword = async (newPassword: string, accessToken: string) => {
   const decodedToken = verifyToken(
     accessToken,
     envVars.JWT_ACCESS_SECRET,
   ) as JwtPayload;
   const user = await User.findById(decodedToken.userId).select("+password");
-
-  const isOldPasswordMatch = await bcrypt.compare(
-    oldPassword,
-    user!.password as string,
-  );
-
-  if (!isOldPasswordMatch) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "Old Password does not match");
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  user!.password = await bcrypt.hash(
-    newPassword,
-    Number(envVars.BCRYPT_SALT_ROUNDS),
-  );
+  user!.password = await hashPassword(newPassword);
 
   user!.save();
 };
@@ -161,7 +148,6 @@ const googleAuth = async (profile: {
       ],
     });
   } else if (!user.auths.some((auth) => auth.provider === "google")) {
-    // Link Google account to existing email-based account
     user.auths.push({
       provider: "google",
       providerId: profile.googleId,

@@ -21,6 +21,8 @@ interface EnvConfig {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CALLBACK_URL: string;
   EXPRESS_SESSION_SECRET: string;
+  UPLOAD_DIR: string;
+  MAX_STORAGE_BYTES: string;
   CLIENT_URL: string;
 }
 
@@ -45,6 +47,8 @@ const loadEnvVariables = (): EnvConfig => {
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CALLBACK_URL",
     "EXPRESS_SESSION_SECRET",
+    "UPLOAD_DIR",
+    "MAX_STORAGE_BYTES",
     "CLIENT_URL",
   ];
 
@@ -74,6 +78,8 @@ const loadEnvVariables = (): EnvConfig => {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
     GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
     EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
+    UPLOAD_DIR: process.env.UPLOAD_DIR as string,
+    MAX_STORAGE_BYTES: process.env.MAX_STORAGE_BYTES as string,
     CLIENT_URL: process.env.CLIENT_URL as string,
   };
 };

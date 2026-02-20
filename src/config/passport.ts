@@ -20,16 +20,11 @@ passport.use(
       try {
         const isUserExist = await User.findOne({ email });
 
-        // if (!isUserExist) {
-        //     return done(null, false, { message: "User does not exist" })
-        // }
-
         if (!isUserExist) {
           return done("User does not exist");
         }
 
         if (isUserExist.isDeleted) {
-          // throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
           return done("User is deleted");
         }
 
@@ -43,10 +38,6 @@ passport.use(
               "You have authenticated through Google. So if you want to login with credentials, then at first login with google and set a password for your Gmail and then you can login with email and password.",
           });
         }
-
-        // if (isGoogleAuthenticated) {
-        //     return done("You have authenticated through Google. So if you want to login with credentials, then at first login with google and set a password for your Gmail and then you can login with email and password.")
-        // }
 
         const isPasswordMatched = await bcrypt.compare(
           password as string,
@@ -74,8 +65,8 @@ passport.use(
       callbackURL: envVars.GOOGLE_CALLBACK_URL,
     },
     async (
-      accessToken: string,
-      refreshToken: string,
+      _accessToken: string,
+      _refreshToken: string,
       profile: Profile,
       done: VerifyCallback,
     ) => {

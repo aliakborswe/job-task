@@ -1,3 +1,4 @@
+import { checkAuth } from "./../../middlewares/checkAuth";
 import { NextFunction, Request, Response, Router } from "express";
 import passport from "passport";
 import { validate } from "../../middlewares/validate";
