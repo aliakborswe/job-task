@@ -118,6 +118,20 @@ const searchFolders = catchAsync(
   },
 );
 
+const deleteFolder = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const folderId = req.params.folderId as string;
+    await FolderService.deleteFolder(userId, folderId);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Folder deleted successfully",
+    });
+  },
+);
+
 export const FolderController = {
   createFolder,
   getFolders,
@@ -126,4 +140,5 @@ export const FolderController = {
   getPrivateFolder,
   getFolderById,
   searchFolders,
+  deleteFolder,
 };

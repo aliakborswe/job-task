@@ -4,6 +4,8 @@ import { IFolder, PaginationResult } from "./folder.interface";
 import { Folder } from "./folder.model";
 import { User } from "../user/user.model";
 import { hashPin } from "../../helpers/hash";
+import { File } from "../file/file.model";
+import { deleteLocalFile } from "../../helpers/fileSystem";
 
 const createFolder = async (payload: Partial<IFolder>) => {
   const { name, userId } = payload;
@@ -113,6 +115,32 @@ const searchFolders = async (
   return { data: folders, total, page, limit };
 };
 
+const deleteFolder = async (
+  userId: string,
+  folderId: string,
+): Promise<void> => {
+  const folder = await Folder.findOne({ _id: folderId, userId });
+  if (!folder) {
+    throw new AppError(httpStatus.NOT_FOUND, "Folder not found");
+  }
+
+  const files = await File.find({ folderId: folder._id, userId });
+  let totalSize = 0;
+
+  for (const file of files) {
+    deleteLocalFile(file.path);
+    totalSize += file.size;
+  }
+
+  await File.deleteMany({ folderId: folder._id, userId });
+
+  await User.findByIdAndUpdate(userId, {
+    $inc: { storageUsed: -totalSize },
+  });
+
+  await Folder.findByIdAndDelete(folderId);
+};
+
 export const FolderService = {
   createFolder,
   getFolders,
@@ -121,4 +149,5 @@ export const FolderService = {
   getPrivateFolder,
   getFolderById,
   searchFolders,
+  deleteFolder,
 };
