@@ -4,6 +4,7 @@ import { validate } from "../../middlewares/validate";
 import {
   createFolderSchema,
   createPrivateFolderSchema,
+  deleteFolderSchema,
   renameFolderSchema,
   searchFoldersSchema,
 } from "./folder.validation";
@@ -33,6 +34,7 @@ router.get(
   FolderController.searchFolders,
 );
 router.get("/", checkAuth, FolderController.getFolders);
+
 router.get("/:folderId", checkAuth, FolderController.getFolderById);
 
 router.patch(
@@ -40,6 +42,13 @@ router.patch(
   checkAuth,
   validate(renameFolderSchema),
   FolderController.renameFolder,
+);
+
+router.delete(
+  "/:folderId",
+  checkAuth,
+  validate(deleteFolderSchema),
+  FolderController.deleteFolder,
 );
 
 export const FolderRoutes = router;

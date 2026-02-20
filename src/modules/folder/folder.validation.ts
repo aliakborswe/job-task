@@ -43,3 +43,9 @@ export const searchFoldersSchema = z.object({
     limit: z.string().optional(),
   }),
 });
+
+export const deleteFolderSchema = z.object({
+  params: z.object({
+    folderId: z.string({ error: "Folder ID is required" }),
+  }),
+});
