@@ -22,7 +22,6 @@ const createFolder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// get all folders controller
 const getFolders = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user as { userId: string };
@@ -40,7 +39,6 @@ const getFolders = catchAsync(
   },
 );
 
-// rename folder controller
 const renameFolder = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user as { userId: string };
@@ -57,7 +55,6 @@ const renameFolder = catchAsync(
   },
 );
 
-// create private folder controller
 const createPrivateFolder = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user as { userId: string };
@@ -88,7 +85,6 @@ const getPrivateFolder = catchAsync(
   },
 );
 
-// get folder by id controller
 const getFolderById = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.user as { userId: string };

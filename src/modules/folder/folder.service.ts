@@ -11,7 +11,6 @@ const createFolder = async (payload: Partial<IFolder>) => {
   return folder;
 };
 
-// get all folders service
 const getFolders = async (
   userId: string,
   options: { includePrivate?: boolean; page?: number; limit?: number } = {},
@@ -32,7 +31,6 @@ const getFolders = async (
   return { data: folders, total, page, limit };
 };
 
-//rename folder service
 const renameFolder = async (
   userId: string,
   folderId: string,
@@ -48,7 +46,6 @@ const renameFolder = async (
   return folder;
 };
 
-// create privet folder service
 const createPrivateFolder = async (
   userId: string,
   name: string,
@@ -84,7 +81,6 @@ const getPrivateFolder = async (userId: string): Promise<IFolder | null> => {
   return Folder.findOne({ userId, isPrivate: true });
 };
 
-// get folder by id service
 const getFolderById = async (
   userId: string,
   folderId: string,
@@ -96,7 +92,6 @@ const getFolderById = async (
   return folder;
 };
 
-// search folders service
 const searchFolders = async (
   userId: string,
   name: string,
