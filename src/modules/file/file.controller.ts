@@ -49,7 +49,57 @@ const getFilesByFolder = catchAsync(
   },
 );
 
+const getFileById = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const fileId = req.params.fileId as string;
+    const file = await FileService.getFileById(userId, fileId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "File retrieved successfully",
+      data: file,
+    });
+  },
+);
+
+const renameFile = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const fileId = req.params.fileId as string;
+    const { name } = req.body;
+    const file = await FileService.renameFile(userId, fileId, name);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "File renamed successfully",
+      data: file,
+    });
+  },
+);
+
+const copyFile = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const fileId = req.params.fileId as string;
+    const { targetFolderId } = req.body;
+    const file = await FileService.copyFile(userId, fileId, targetFolderId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "File copied successfully",
+      data: file,
+    });
+  },
+);
+
 export const FileController = {
   uploadFile,
   getFilesByFolder,
+  getFileById,
+  renameFile,
+  copyFile,
 };

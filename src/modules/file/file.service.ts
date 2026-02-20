@@ -4,10 +4,11 @@ import { User } from "../user/user.model";
 import { envVars } from "../../config/env";
 import { Folder } from "../folder/folder.model";
 import { IFile, PaginationResult } from "./file.interface";
-import { deleteLocalFile } from "../../helpers/fileSystem";
+import { copyLocalFile, deleteLocalFile } from "../../helpers/fileSystem";
 import { getFileType } from "../../middlewares/upload";
 import { File } from "./file.model";
 import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 // check user have available storage
 const checkUserStorage = async (
@@ -96,7 +97,77 @@ const getFilesByFolder = async (
   return { data: files, total, page, limit };
 };
 
+const getFileById = async (userId: string, fileId: string): Promise<IFile> => {
+  const file = await File.findOne({ _id: fileId, userId });
+  if (!file) {
+    throw new AppError(httpStatus.NOT_FOUND, "File not found");
+  }
+  return file;
+};
+
+const renameFile = async (
+  userId: string,
+  fileId: string,
+  name: string,
+): Promise<IFile> => {
+  const file = await File.findOne({ _id: fileId, userId });
+  if (!file) {
+    throw new AppError(httpStatus.NOT_FOUND, "File not found");
+  }
+
+  file.name = name;
+  await file.save();
+  return file;
+};
+
+const copyFile = async (
+  userId: string,
+  fileId: string,
+  targetFolderId: string,
+): Promise<IFile> => {
+  const file = await File.findOne({ _id: fileId, userId });
+  if (!file) {
+    throw new AppError(httpStatus.NOT_FOUND, "File not found");
+  }
+
+  const targetFolder = await Folder.findOne({ _id: targetFolderId, userId });
+  if (!targetFolder) {
+    throw new AppError(httpStatus.NOT_FOUND, "Target folder not found");
+  }
+
+  await checkUserStorage(userId, file.size);
+
+  const ext = path.extname(file.path);
+  const newFileName = `${uuidv4()}${ext}`;
+  const newPath = path.join(path.dirname(file.path), newFileName);
+  copyLocalFile(file.path, newPath);
+
+  const copiedFile = await File.create({
+    name: `${file.name} (copy)`,
+    originalName: file.originalName,
+    type: file.type,
+    mimeType: file.mimeType,
+    size: file.size,
+    path: newPath,
+    userId,
+    folderId: targetFolder._id,
+    isPrivate: targetFolder.isPrivate,
+  });
+
+  await Promise.all([
+    User.findByIdAndUpdate(userId, { $inc: { storageUsed: file.size } }),
+    Folder.findByIdAndUpdate(targetFolderId, {
+      $inc: { storageUsed: file.size },
+    }),
+  ]);
+
+  return copiedFile;
+};
+
 export const FileService = {
   uploadFile,
   getFilesByFolder,
+  getFileById,
+  renameFile,
+  copyFile,
 };
