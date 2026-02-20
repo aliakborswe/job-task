@@ -40,7 +40,25 @@ const getFolders = catchAsync(
   },
 );
 
+// rename folder controller
+const renameFolder = catchAsync(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.user as { userId: string };
+    const folderId = req.params.folderId as string;
+    const { name } = req.body;
+    const folder = await FolderService.renameFolder(userId, folderId, name);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Folder renamed successfully",
+      data: folder,
+    });
+  },
+);
+
 export const FolderController = {
   createFolder,
   getFolders,
+  renameFolder,
 };

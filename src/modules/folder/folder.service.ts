@@ -1,3 +1,5 @@
+import httpStatus from "http-status";
+import AppError from "../../utils/AppError";
 import { IFolder, PaginationResult } from "./folder.interface";
 import { Folder } from "./folder.model";
 
@@ -28,7 +30,24 @@ const getFolders = async (
   return { data: folders, total, page, limit };
 };
 
+//rename folder service
+const renameFolder = async (
+  userId: string,
+  folderId: string,
+  name: string,
+): Promise<IFolder> => {
+  const folder = await Folder.findOne({ _id: folderId, userId });
+  if (!folder) {
+    throw new AppError(httpStatus.NOT_FOUND, "Folder not found");
+  }
+
+  folder.name = name;
+  await folder.save();
+  return folder;
+};
+
 export const FolderService = {
   createFolder,
   getFolders,
+  renameFolder,
 };
