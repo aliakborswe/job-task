@@ -104,30 +104,6 @@ const getNewAccessToken = catchAsync(
   },
 );
 
-// logout controller
-const logout = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie("accessToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: "User Logout Successful",
-      data: null,
-    });
-  },
-);
-
 const googleCallbackController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let redirectTo = req.query.state ? (req.query.state as string) : "";
@@ -155,6 +131,5 @@ export const AuthController = {
   forgotPassword,
   resetPassword,
   getNewAccessToken,
-  logout,
   googleCallbackController,
 };

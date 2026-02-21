@@ -26,7 +26,6 @@ router.post(
   AuthController.resetPassword,
 );
 router.post("/refresh-token", AuthController.getNewAccessToken);
-router.post("/logout", AuthController.logout);
 
 router.get(
   "/google",
